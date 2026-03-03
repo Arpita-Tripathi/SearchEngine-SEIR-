@@ -1,46 +1,40 @@
-import requests
-from bs4 import BeautifulSoup
+import sys
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 def extract_data(link):
     try:
-        # Added timeout (5 seconds)
-        response = requests.get(link, timeout=5)
-        response.raise_for_status()
+        if not link.startswith("http"):
+            link = "https://" + link
 
-        soup = BeautifulSoup(response.text, "html.parser")
+        opt = Options()
+        opt.add_argument("--headless")
 
-        # Title
-        if soup.title:
-            print("Title:", soup.title.string.strip())
-        else:
-            print("No Title Found")
+        driver = webdriver.Chrome(options=opt)
+        driver.get(link)
 
-        # Body
-        print("\nBody:")
-        if soup.body:
-            print(soup.body.get_text(strip=True))
-        else:
-            print("No Body Found")
+        time.sleep(3)
 
-        # Links
-        print("\nLinks:")
-        for a in soup.find_all("a"):
-            href = a.get("href")
-            if href:
+        print(driver.title)
+
+        body = driver.find_element(By.TAG_NAME, "body")
+        print(body.text)
+
+        all_links = driver.find_elements(By.TAG_NAME, "a")
+        for l in all_links:
+            href = l.get_attribute("href")
+            if href != None:
                 print(href)
 
-    except requests.exceptions.Timeout:
-        print("Error: Request timed out")
-
-    except requests.exceptions.RequestException as e:
-        print("Request Error:", e)
+        driver.quit()
 
     except Exception as e:
-        print("Other Error:", e)
+        print("Error:", e)
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python scraper.py <website>")
-    else:
-        website = sys.argv[1]
-        extract_data(website)
+
+if len(sys.argv) != 2:
+    print("Usage: python scraper.py <website>")
+else:
+    extract_data(sys.argv[1])
