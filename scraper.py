@@ -38,6 +38,9 @@ def extract_data(link):
     except Exception as e:
         print("Other Error:", e)
 
-
-# Function call
-extract_data("https://presidentofindia.nic.in/dr-apj-abdul-kalam-profile")
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python scraper.py <website>")
+    else:
+        website = sys.argv[1]
+        extract_data(website)
